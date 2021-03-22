@@ -239,9 +239,13 @@ void prs(UINT addr) {
 int runProgram(UINT addr) {
 	int num;
 	int temp;
-	for(int i= addr; i < code_end; i+= 2)
+	for(int i= addr+2; i < code_end; i+= 2)
         {
-            sprintf(instruction,"%02x%02x",mem[i],mem[i+1]);
+	    printf("addr 10 : %d, addr 16 : %04X, readWord(addr) 10 : %d, readWord(addr) 16 : %04X\n", i, i, readWord(i), readWord(i));//addr 10 : 514, addr 16 : 0202, readWord(addr) 10 : 28930, readWord(addr) 16 : 7102
+	    printf("mem : %04X %d\n", readWord(0x0100), readWord(0x0100));
+	    printf("mem2 : %04X %d\n", readWord(0x0102),readWord(0x0102));
+            
+	    sprintf(instruction,"%02x%02x",mem[i],mem[i+1]);
             sprintf(address, "%c%c%c", instruction[1],instruction[2],instruction[3]);
 	    printf("address : %s\n", address);
 	    num = atoi(address);
@@ -257,7 +261,9 @@ int runProgram(UINT addr) {
             {
                 printf("LDA처리\n");
 		temp = mem[i];
-		printf("mem[i] : %d\n", mem[i]);
+		printf("mem[i] : %x\n", mem[i]);
+		printf("readWord : %04X\n", readWord(i));
+		printf("mem[readWord] : %04X %d \n", mem[readWord(i)], mem[readWord(i)]);
             }
             else if(instruction[0] == '2') //STA
             {
@@ -266,6 +272,7 @@ int runProgram(UINT addr) {
             else if(instruction[0] == '3') //ADD
             {
                 printf("ADD처리\n");
+		printf("mem[readWord(i)] :  %04X %d\n", mem[readWord(i)], mem[readWord(i)]);
             }
             else if(instruction[0] == '4') //SUB
             {
