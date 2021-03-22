@@ -169,8 +169,8 @@ UINT loadProgram() {
 
 	// CODE section ----------------------------------------
 
-	code_end = writeWords(code_bgn =
-			0x0200,		0x1100,	// 0200: LDA A
+	/*code_end = writeWords(code_bgn =
+			0x0200,			0x1100,	// 		0200: LDA A
 						0x7102,	// 		 MUL B
 						0x2104,	// 		 STA X
 						0x3106,	// 		 ADD TEN
@@ -179,6 +179,23 @@ UINT loadProgram() {
 						0xB104,	// 		 PRT X
 						0xC00A,	// 		 PRC '\n'
 						0x8000,	// 		 HLT
+						END_OF_ARG);*/
+
+	code_end = writeWords(code_bgn = 0x0200,
+						0x1106, //		LDA X
+						0x7106, //		MUL X
+						0x7100, //		MUL A
+						0x2108, //		STA Y
+						0x1106, //		LDA X
+						0x7102, //		MUL B
+						0x3108, //		ADD Y
+						0x2108, //		STA Y
+						0x1104, //		LDA C
+						0x3108, //		ADD Y
+						0xD108, //		PRS "Y="
+						0xB104, //		PRT Y
+						0xC00A, //		PRC '\n'
+						0x8000, //		HLT
 						END_OF_ARG);
 
 	// -----------------------------------------------------
@@ -204,6 +221,8 @@ void inputData() {
 	// input data
 	inputNumber("0100: A = ", 0x0100);
 	inputNumber("0102: B = ", 0x0102);
+	inputNumber("0104: C = ", 0x0104);
+	inputNumber("0106: X = ", 0x0106);
 
 	// print DATA section for verify
 	printMemory("DATA", data_bgn, data_end);
@@ -236,6 +255,12 @@ void prs(UINT addr) {
 		printf("%c", ch);
 		ch = (int)mem[++addr];
 	}
+}
+
+void compile_mode(UINT pc, char ir[])
+{
+	printf("<fetch> PC:%04X IR:%s \n", pc, ir);
+	printMemory(NULL, data_bgn, data_end);
 }
 
 //========================================
@@ -278,6 +303,7 @@ int runProgram(UINT addr) {
                     instruction[i] = instruction[i] - 32;
             }
             //printf("%s\n",instruction);
+	    //compile_mode(i, instruction);
             if(instruction[0] == '1') //LDA
             {
 		UINT IR_address;
@@ -359,7 +385,7 @@ int main() {
 
 	printf("========================================\n");
 	printf(" AccCom: Accumulator Computer Simulator\n");
-	printf("     modified by 201901234 Hong Gildong\n");
+	printf("     modified by 201602141 Yoo Hwanseung\n");
 	printf("========================================\n");
 
 	printf("*** Load ***\n");
