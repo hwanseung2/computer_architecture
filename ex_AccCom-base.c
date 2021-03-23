@@ -163,13 +163,24 @@ UINT loadProgram() {
 						0x8005,	// 0102: B=-5
 						0x0000,	// 0104: X
 						0x000A,	// 0106: TEN=10
-						0x583D,	// 0108: STR 'X' '='
-						0x0000,	// 010A:     '\0'
+						//여기서부터 Y시작
+						0x0000, // 0108:Y
+						0x4158, // 010A : AX,
+						0x5E32,// 010C : ^2
+						0x2B42,// 010E : +B
+						0x582B,// 0110 : X+
+						0x4300,// 0112 : C 
+						0x3D00,// 0114 : =
+						0x0000,// 0116 : '\n'
+						
+
+						//0x583D,	// 0108: STR 'X' '='
+						//0x0000,	// 010A:     '\0'
 						END_OF_ARG);
 
 	// CODE section ----------------------------------------
 
-	/*code_end = writeWords(code_bgn =
+/*	code_end = writeWords(code_bgn =
 			0x0200,			0x1100,	// 		0200: LDA A
 						0x7102,	// 		 MUL B
 						0x2104,	// 		 STA X
@@ -192,20 +203,21 @@ UINT loadProgram() {
 						0x2108, //		STA Y
 						0x1104, //		LDA C
 						0x3108, //		ADD Y
-						0xD108, //		PRS "Y="
-						0xB104, //		PRT Y
-						0xC00A, //		PRC '\n'
+						0xD10A,
+						0xD10C,
+						0xD10E,
+						0xD110,
+						0xD112,
+						0xD114,
+						0xB108, //		PRT Y
+						0xC116, //		PRC '\n'
 						0x8000, //		HLT
 						END_OF_ARG);
 
 	// -----------------------------------------------------
 
 	// print memory for verify
-	//printf("DATA 10 %d %d\n", data_bgn, data_end);
-	//printf("DATA 16 %02x %02x\n", data_bgn, data_end);
 	printMemory("DATA", data_bgn, data_end);
-	//printf("CODE 10 %d %d\n", code_bgn, code_end);
-	//printf("CODE 16 %02x %02x\n", code_bgn, code_end);
 	printMemory("CODE", code_bgn, code_end);
 
 	return code_bgn;	// return start address of program
@@ -216,7 +228,7 @@ UINT loadProgram() {
 //========================================
 void inputData() {
 	// print problem summary
-	printf("X = A*B + 10\n");
+	printf("Y = AX^2 +BX + C\n");
 
 	// input data
 	inputNumber("0100: A = ", 0x0100);
@@ -257,10 +269,17 @@ void prs(UINT addr) {
 	}
 }
 
-void compile_mode(UINT pc, char ir[])
+void debug_fetch(UINT pc, char ir[])
 {
-	printf("<fetch> PC:%04X IR:%s \n", pc, ir);
-	printMemory(NULL, data_bgn, data_end);
+	printf("<fetch> PC:%04X IR:%s ", pc, ir);
+	
+}
+void debug_exec()
+{
+	char tmp[10];
+	sprintf(tmp, "%c%c%c", '1','0','4');
+	UINT acc_address = strtol(tmp, NULL, 16);
+	printf("ACC:%04X\n", readWord(0x0108));
 }
 
 //========================================
@@ -271,106 +290,107 @@ void compile_mode(UINT pc, char ir[])
 //========================================
 int runProgram(UINT addr) {
 	int num;
-
-	for (int i = data_bgn;i<data_end;i+=2)
-	{
-		//printf("prt(i) : ");
-		//prt(i);
-		//printf("\n");
-		//printf("access : %d\n", accnum2cint(readWord(i)));
-	}
+	
 	for(int i= addr; i < code_end; i+= 2)
         {
-	    //printf("addr 10 : %d, addr 16 : %04X, readWord(addr) 10 : %d, readWord(addr) 16 : %04X\n", i, i, readWord(i), readWord(i));//addr 10 : 514, addr 16 : 0202, readWord(addr) 10 : 28930, readWord(addr) 16 : 7102
-	    //printf("mem : %04X %d\n", readWord(0x0100), readWord(0x0100));
-	    //printf("mem2 : %04X %d\n", readWord(0x0102),readWord(0x0102));
-	    //printf("prt(i) : ");
-	    //
-	    //printf("\n");
-            //#prt(mem[readWord("0x0100")]);
-	    //printf("\n");
-
             
 	    sprintf(instruction,"%02x%02x",mem[i],mem[i+1]);
             sprintf(address, "%c%c%c", instruction[1],instruction[2],instruction[3]);
-	    //printf("address : %s\n", address);
-	    num = atoi(address);
-	    //printf("address atoi : %d\n", num);
-	    //printf("%s\n",instruction);
+	    UINT IR_address;
+	    IR_address = strtol(address, NULL, 16);
+
             for(int i =0; i < 4; i++)
             {
                 if(instruction[i] >= 'a' && instruction[i] <= 'z')
                     instruction[i] = instruction[i] - 32;
             }
-            //printf("%s\n",instruction);
-	    //compile_mode(i, instruction);
+	    //debug_mode(i, instruction, IR_address);
+	    printf("\n%d\n", acc);
+
             if(instruction[0] == '1') //LDA
             {
-		UINT IR_address;
-		//data_address를 받기전에 16진수로 데이터의 주소를 받아야한다.
-		IR_address = strtol(address, NULL, 16); 
-                acc = accnum2cint(readWord(IR_address));
+                    debug_fetch(i, instruction);
+		    acc = accnum2cint(readWord(IR_address));
+		    debug_exec();
+			printMemory(NULL, data_bgn, data_end);
             }
             else if(instruction[0] == '2') //STA
             {
-		UINT temp_address;
-		temp_address = strtol(address, NULL, 16);
-		writeWord(temp_address,cint2accnum(acc));
-		//printf("STA처리 : %04X %04X\n", temp_address,cint2accnum(acc));
+		    debug_fetch(i, instruction);
+		writeWord(IR_address,cint2accnum(acc));
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
 
             }
             else if(instruction[0] == '3') //ADD
             {
-		temp_address = strtol(address, NULL, 16);
-		temp = accnum2cint(readWord(temp_address));
+		    debug_fetch(i, instruction);
+		temp = accnum2cint(readWord(IR_address));
 		acc += temp;
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
 
             }
             else if(instruction[0] == '4') //SUB
             {
-		
-		temp_address = strtol(address, NULL, 16);
-		temp = accnum2cint(readWord(temp_address));
+		debug_fetch(i, instruction);
+		temp = accnum2cint(readWord(IR_address));
 		acc -= temp;
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
             }
             else if(instruction[0] == '5') //JMP Pass
             {
+		debug_fetch(i, instruction);
                 printf("JMP처리\n");
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
             }
             else if(instruction[0] == '7')
             {
-		temp_address = strtol(address, NULL, 16);
-		temp = accnum2cint(readWord(temp_address));
+		    debug_fetch(i, instruction);
+		temp = accnum2cint(readWord(IR_address));
 		acc *= temp;
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
             }
             else if(instruction[0] == 'B') //PRT
             {
-		UINT temp_address;
-		temp_address = strtol(address, NULL, 16);
-		prt(temp_address);
-		printf("\n");
+		    debug_fetch(i, instruction);
+		prt(IR_address);
+		debug_exec();
+
+		printMemory(NULL, data_bgn, data_end);
 
             }
             else if(instruction[0] == 'C') // PRC
             {
-                int character;
-		temp_address = strtol(address, NULL, 16);
-		temp = accnum2cint(readWord(temp_address));
-		prc(temp_address);
+		    debug_fetch(i, instruction);
+		temp = accnum2cint(readWord(IR_address));
+		prc(IR_address);
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
             }
             else if(instruction[0] == 'D') // PRS
             {
-		temp_address = strtol(address, NULL, 16);
-		prs(temp_address);
+		    debug_fetch(i, instruction);
+		prs(IR_address);
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
 
             }
             else if(strcmp(instruction,"8002") == 0)//IAC 누산기의 값 1증가
             {
+		    debug_fetch(i, instruction);
                 printf("IAC처리\n");
+		debug_exec();
+		printMemory(NULL, data_bgn, data_end);
             }
             else if(strcmp(instruction,"8000")== 0) {
-                printf("HLT 명령어의해 종료 됩니다\n");
-                return 0;
+                    debug_fetch(i, instruction);
+		    debug_exec();
+		    printMemory(NULL, data_bgn, data_end);
+		    return 0;
             }
         }
 	return 0;
