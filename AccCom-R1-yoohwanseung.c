@@ -212,7 +212,7 @@ UINT loadProgram() {
 						0x2108, //		STA Y
 						0x1104, //		LDA C
 						0x3108, //		ADD Y
-						0x2108,
+						0x2108, //		STA Y,
 						//0xD10A,
 						//0xD10C,
 						//0xD10E,
@@ -292,7 +292,6 @@ void debug_fetch(UINT pc, char ir[])
 }
 void debug_exec(int acc)
 {
-	char tmp[10];
 	printf(" <Exec> ACC:%04X\n", cint2accnum(acc));
 }
 
@@ -303,7 +302,6 @@ void debug_exec(int acc)
 //                       1: error exit
 //========================================
 int runProgram(UINT addr) {
-	int num;
 	
 	for(int i= addr; i < code_end; i+= 2)
         {
