@@ -34,6 +34,7 @@ char instruction[10];
 int IR;
 int acc;
 int temp;
+int pc;
 UINT temp_address;
 int data_address;
 char address[10];
@@ -302,11 +303,12 @@ void debug_exec(int acc)
 //                       1: error exit
 //========================================
 int runProgram(UINT addr) {
-	
-	for(int i= addr; i < code_end; i+= 2)
+	pc = addr;
+	//for(int i= addr; i < code_end; i+= 2)
+	while(pc != code_end)
         {
             
-	    sprintf(instruction,"%02x%02x",mem[i],mem[i+1]);
+	    sprintf(instruction,"%02x%02x",mem[pc],mem[pc+1]);
             sprintf(address, "%c%c%c", instruction[1],instruction[2],instruction[3]);
 	    UINT IR_address;
 	    IR_address = strtol(address, NULL, 16);
@@ -321,99 +323,110 @@ int runProgram(UINT addr) {
 
             if(instruction[0] == '1') //LDA
             {
-                    debug_fetch(i, instruction);
+                    debug_fetch(pc, instruction);
 		    acc = accnum2cint(readWord(IR_address));
 		    //writeWord(0x0104, cint2accnum(acc));
 		    debug_exec(acc);
 
 		    printMemory(NULL, data_bgn, data_end);
+		    pc+=2;
             }
 
             else if(instruction[0] == '2') //STA
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
 		writeWord(IR_address,cint2accnum(acc));
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
 
             }
 
             else if(instruction[0] == '3') //ADD
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc += temp;
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
 
             }
 
             else if(instruction[0] == '4') //SUB
             {
-		debug_fetch(i, instruction);
+		debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc -= temp;
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
             }
 
             else if(instruction[0] == '5') //JMP Pass
             {
-		debug_fetch(i, instruction);
+		debug_fetch(pc, instruction);
                 printf("JMP처리\n");
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
             }
 
             else if(instruction[0] == '7')
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc *= temp;
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
             }
 
             else if(instruction[0] == 'B') //PRT
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
 		prt(IR_address);
 		debug_exec(acc);
 
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
 
             }
 
             else if(instruction[0] == 'C') // PRC
             {
-		debug_fetch(i, instruction);
+		debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		prc(IR_address);
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
             }
             else if(instruction[0] == 'D') // PRS
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
 		prs(IR_address);
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
 
             }
 
             else if(strcmp(instruction,"8002") == 0)//IAC 누산기의 값 1증가
             {
-		    debug_fetch(i, instruction);
+		    debug_fetch(pc, instruction);
                 //printf("IAC처리\n");
 		acc +=1;
 		debug_exec(acc);
 		printMemory(NULL, data_bgn, data_end);
+		pc+=2;
             }
 
             else if(strcmp(instruction,"8000")== 0) {
-                    debug_fetch(i, instruction);
+                    debug_fetch(pc, instruction);
 		    debug_exec(acc);
 		    printMemory(NULL, data_bgn, data_end);
+		    pc+=2;
 		    return 0;
             }
 
