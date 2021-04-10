@@ -170,7 +170,7 @@ UINT loadProgram() {
 						END_OF_ARG);*/
 
 	//homework section
-	data_end = writeWords(data_bgn =
+	/*data_end = writeWords(data_bgn =
 			0x0100,		0x8005,	// 0100: A=-5
 						0x000A,	// 0102: B=10
 						0x0000,	// 0104: sum = 0
@@ -189,9 +189,54 @@ UINT loadProgram() {
 
 						//0x583D,	// 0108: STR 'X' '='
 						//0x0000,	// 010A:     '\0'
+						END_OF_ARG);*/
+	data_end = writeWords(data_bgn = 
+			0x0100,			0x0000,
+						0x0000,
+						0x0001,
+						0x0000,
+						0x0000,
+						0x0001,
 						END_OF_ARG);
 
 	// CODE section ----------------------------------------
+	code_end = writeWords(code_bgn = 
+			0x0200,			0x1100,
+						0x2102,
+						0x1102,
+						0x4104,
+						0xA244,
+						0x1104,
+						0x8002,
+						0x2108,
+						0x1102,
+						0x4108,
+						0xA220,
+						0xC020,
+						0x1108,
+						0x8002,
+						0x2108,
+						0x5210,
+						0x110A,
+						0x2106,
+						0x110A,
+						0x8002,
+						0x7104,
+						0x410A,
+						0x4106,
+						0xA23A,
+						0xC023,
+						0x1106,
+						0x8002,
+						0x2106,
+						0x5224,
+						0xC00A,
+						0x1104,
+						0x8002,
+						0x2104,
+						0x5204,
+						0x8000,
+						END_OF_ARG);
 
 	/*code_end = writeWords(code_bgn =
 			0x0200,			0x1100,	// 		0200: LDA A
@@ -229,7 +274,7 @@ UINT loadProgram() {
 						0xC116, //		PRC '\n'
 						0x8000, //		HLT
 						END_OF_ARG);*/
-	code_end = writeWords(code_bgn=
+	/*code_end = writeWords(code_bgn=
 			0x0200,			0x1100, //200
 						0x2106, //202
 						0x1102, //204
@@ -250,7 +295,7 @@ UINT loadProgram() {
 						0xB104,
 						0xC00A,
 						0x8000,
-						END_OF_ARG);
+						END_OF_ARG);*/
 	
 	//Testing
 	/*code_end = writeWords(code_bgn=
@@ -292,8 +337,8 @@ void inputData() {
 	//inputNumber("0104: C = ", 0x0104);
 	//inputNumber("0106: X = ", 0x0106);
 
-	inputNumber("0100: A = ", 0x0100);
-	inputNumber("0102: B = ", 0x0102);
+	inputNumber("Height = ", 0x0100);
+	//inputNumber("0102: B = ", 0x0102);
 	
 
 	// print DATA section for verify
@@ -355,83 +400,52 @@ int runProgram(UINT addr) {
             sprintf(address, "%c%c%c", instruction[1],instruction[2],instruction[3]);
 	    UINT IR_address;
 	    IR_address = strtol(address, NULL, 16);
-	    //printf("pc - 10 : %d 16 : %x\n", pc, pc); // pc는 16진수로 계산해야한다.
-	    //printf("IR_address current 16 진수 %04X\n", IR_address);
-	    //printf("IR_address : %s %d\n", address, atoi(address));
-	    //printf("address atoi : %d 16 : %d\n", atoi(IR_address), atoi(IR_address));
-	    //printf("acc : %d signbit : %d\n", acc, psw_signbit);
-	    //printf("instruction %d %c\n", instruction[0], instruction[0]);
-	    //pc = 204 이런식으ㄹ
+	    //printf("PC : %x\n", pc);
+	    //printf("acc : %d %x\n", acc, pc);
 
             for(int i =0; i < 4; i++)
             {
                 if(instruction[i] >= 'a' && instruction[i] <= 'z')
                     instruction[i] = instruction[i] - 32;
             }
-	    //debug_mode(i, instruction, IR_address);
-	    //printf("\n%d\n", acc);
-
-	    //printf("instruction %d %c\n", instruction[0], instruction[0]);
 
             if(instruction[0] == '1') //LDA
             {
-                    //debug_fetch(pc, instruction);
 		    acc = accnum2cint(readWord(IR_address));
-		    //writeWord(0x0104, cint2accnum(acc));
-		    //debug_exec(acc);
-
-		    //printMemory(NULL, data_bgn, data_end);
 		    pc+=2;
             }
 
             else if(instruction[0] == '2') //STA
             {
-		    //debug_fetch(pc, instruction);
 		writeWord(IR_address,cint2accnum(acc));
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
 
             }
 
             else if(instruction[0] == '3') //ADD
             {
-		    //debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc += temp;
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
 
             }
 
             else if(instruction[0] == '4') //SUB
             {
-		//debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc -= temp;
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
             }
 
             else if(instruction[0] == '5') //JMP Pass
             {
-		//debug_fetch(pc, instruction);
-               // printf("JMP처리\n");
-		//printf("jump : %d\n", IR_address);
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc = IR_address;
             }
 
             else if(instruction[0] == '7')
             {
-		    //debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		acc *= temp;
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
             }
 
@@ -439,11 +453,9 @@ int runProgram(UINT addr) {
 	    {
 		if(psw_zerobit == 1)
 		{
-			//지정한 주소로 분기
 			pc = IR_address;
 		}
 		else{
-		 //분기 x
 			pc+=2;
 		}
 	    }
@@ -452,60 +464,41 @@ int runProgram(UINT addr) {
 	    {
 		if(psw_signbit ==1)
 		{
-			//지정한 주소로 분기
 			pc = IR_address;
 
 		}
 		else{
-		//분기x
 			pc +=2;
 		}
 	    }
 
             else if(instruction[0] == 'B') //PRT
             {
-		    //debug_fetch(pc, instruction);
 		prt(IR_address);
-		//debug_exec(acc);
-
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
 
             }
 
             else if(instruction[0] == 'C') // PRC
             {
-		//debug_fetch(pc, instruction);
 		temp = accnum2cint(readWord(IR_address));
 		prc(IR_address);
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
             }
             else if(instruction[0] == 'D') // PRS
             {
-		   // debug_fetch(pc, instruction);
 		prs(IR_address);
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
 
             }
 
             else if(strcmp(instruction,"8002") == 0)//IAC 누산기의 값 1증가
             {
-		    //debug_fetch(pc, instruction);
-                //printf("IAC처리\n");
 		acc +=1;
-		//debug_exec(acc);
-		//printMemory(NULL, data_bgn, data_end);
 		pc+=2;
             }
 
             else if(strcmp(instruction,"8000")== 0) {
-                    //debug_fetch(pc, instruction);
-		    //debug_exec(acc);
-		    //printMemory(NULL, data_bgn, data_end);
 		    pc+=2;
 		    return 0;
             }
